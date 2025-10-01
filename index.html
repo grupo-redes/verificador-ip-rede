@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software de Redes</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <img src="styles/logo.png" alt="IESB Logo" class="logo">
+                <div class="header-text">
+                    <h1>Software de Redes de Computadores</h1>
+                    <p>Trabalho acadêmico - Analisador de Redes (IP)</p>
+                </div>
+            </div>
+        </header>
+
+        <main>
+
+            <!-- Entradas -->
+            <section class="input-section">
+                <div class="ip-origem-group">
+                    <label id="ipOrigem">IP de Origem: 192.168.15.4</label>
+                    <button type="button" id="generateIp" class="generate-btn" title="Gerar IP aleatório">
+                        🎲 Gerar
+                    </button>
+                </div>
+
+                <h2>Entradas</h2>
+
+                <div class="form-group">
+                    <label for="mask">Máscara (CIDR):</label>
+                    <input type="number" id="mask" placeholder="Ex: 24" />
+                    <small id="mask-help" class="helptext"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="ip">IP de destino:</label>
+                    <input type="text" id="ip" placeholder="Ex: 192.168.0.50" />
+                    <small id="ip-help" class="helptext"></small>
+                </div>
+
+                <button id="calculate">Verificar</button>
+
+            </section>
+
+            <!-- Saídas -->
+            <section class="output-section">
+                <h2>Resultados</h2>
+                <div class="output">
+                    <p><strong>Máscara em decimal:</strong> <span id="mask-decimal">---</span></p>
+                    <p><strong>IPs estão na mesma rede?</strong> <span id="same-network">---</span></p>
+                </div>
+            </section>
+
+        </main>
+
+        <footer>
+            <p>Desenvolvido por Anita, Guilherme, Karina e Lívia - Redes de Computadores</p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+    
+</body>
+</html>

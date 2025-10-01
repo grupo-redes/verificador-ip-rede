@@ -1,0 +1,297 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #fdf2f2; /* tom suave de vermelho bem claro */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 700px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+header {
+    background: #b91c1c; /* vermelho escuro */
+    color: white;
+    padding: 28px 24px;
+    text-align: center;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.logo {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+
+.header-text {
+    text-align: left;
+}
+
+/* Em telas menores, empilha verticalmente */
+@media (max-width: 600px) {
+    .header-content {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .header-text {
+        text-align: center;
+    }
+    
+    .logo {
+        height: 50px;
+    }
+}
+
+header h1 {
+    font-size: 1.6rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+header p {
+    font-weight: 300;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+main {
+    padding: 28px 24px;
+}
+
+h2 {
+    margin-bottom: 20px;
+    margin-top: 12px;
+    color: #b91c1c; /* vermelho escuro */
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #fca5a5; /* vermelho claro */
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 400;
+    transition: border 0.3s, box-shadow 0.3s;
+    line-height: 1.4;
+}
+
+input:focus {
+    border-color: #dc2626; /* vermelho médio */
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+button {
+    background: #dc2626; /* vermelho médio */
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    margin-top: 8px;
+    margin-bottom: 32px; /* Separar da seção de resultados */
+    letter-spacing: 0.01em;
+}
+
+button:hover {
+    background: #991b1b; /* vermelho mais escuro */
+    transform: translateY(-1px);
+}
+
+.output {
+    background: #f9fafb; /* fundo cinza bem claro - igual ao IP origem */
+    border: 1px solid #e5e7eb; /* borda cinza clara - igual ao IP origem */
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.output p {
+    margin-bottom: 12px;
+    line-height: 1.5;
+    font-size: 0.95rem;
+    color: #374151; /* cor mais suave */
+    font-weight: 400;
+}
+
+.output p:last-child {
+    margin-bottom: 0;
+}
+
+.output p strong {
+    color: #111827; /* destaque mais sutil para os labels */
+    font-weight: 500;
+}
+
+.output p span {
+    color: #dc2626; /* vermelho para os valores/resultados */
+    font-weight: 500;
+}
+
+footer {
+    text-align: center;
+    background: #fef2f2;
+    padding: 20px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #991b1b;
+    line-height: 1.4;
+}
+
+/* Estilos para mensagens de ajuda */
+.helptext {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    line-height: 1.3;
+    color: #6b7280;
+}
+
+/* Estilo para inputs com erro */
+.input-error {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* Estilo para o IP de origem (caixa informativa) */
+#ipOrigem {
+    background: #f9fafb; /* fundo cinza bem claro */
+    border: 1px solid #e5e7eb; /* borda cinza clara */
+    color: #6b7280; /* texto cinza */
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 8px; /* Espaço para o botão abaixo */
+    margin-top: 0;
+    display: block;
+    cursor: not-allowed;
+    line-height: 1.4;
+    text-align: left;
+    width: 100%;
+}
+
+/* Container para IP de origem + botão (agora vertical) */
+.ip-origem-group {
+    margin-bottom: 24px;
+}
+
+/* Botão para gerar IP aleatório */
+.generate-btn {
+    background: #6b7280; /* cinza neutro */
+    color: white;
+    border: none;
+    padding: 10px 20px; /* Padding similar ao botão Verificar */
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0;
+    margin-bottom: 0;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+}
+
+.generate-btn:hover {
+    background: #4b5563; /* cinza mais escuro */
+    opacity: 1;
+    transform: translateY(-1px); /* Mesmo efeito do botão Verificar */
+}
+
+.generate-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.6;
+}
+
+/* Container para IP de origem + botão */
+.ip-origem-container {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    margin-bottom: 24px;
+}
+
+/* Botão para gerar IP aleatório */
+.generate-btn {
+    background: #333; /* cinza neutro */
+    color: white;
+    border: none;
+    padding: 6px 20px; /* Mais padding horizontal para formato retangular */
+    border-radius: 8px; /* Mesmo border-radius do campo IP de origem */
+    font-size: 0.8rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 0; /* Remove margens do botão padrão */
+    white-space: nowrap;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 85px; /* Largura mínima maior para formato retangular */
+    opacity: 0.8;
+    line-height: 1.4; /* Mesmo line-height do campo IP de origem */
+}
+
+.generate-btn:hover {
+    background: #1d1d1d; /* cinza mais escuro */
+    opacity: 1;
+    transform: scale(1.02);
+}
+
+.generate-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.6;
+}
+
