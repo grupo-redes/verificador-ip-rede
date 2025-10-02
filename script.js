@@ -1,43 +1,94 @@
+/**
+ * VERIFICADOR DE IP E REDE
+ * ======================
+ * 
+ * Software acadêmico para análise de redes de computadores
+ * Verifica se dois endereços IP estão na mesma rede com base na máscara CIDR
+ * 
+ * @author Anita, Guilherme, Karina e Lívia
+ * @course Redes de Computadores - IESB
+ * @version 1.0
+ * @date 2025
+ * 
+ * Funcionalidades:
+ * - Geração de IP aleatório para origem
+ * - Validação em tempo real de entradas
+ * - Conversão CIDR para máscara decimal
+ * - Verificação de pertencimento à mesma rede
+ * - Interface responsiva com feedback visual
+ */
+
 // ===================== Configuração =====================
 
-let ipOrigem = "192.168.15.4"; // IP dinâmico, pode ser alterado
+/** @type {string} IP de origem padrão (pode ser alterado dinamicamente) */
+let ipOrigem = "192.168.15.4";
+
+/** @type {number} Valor mínimo permitido para CIDR */
 const CIDR_MIN = 1;
+
+/** @type {number} Valor máximo permitido para CIDR */
 const CIDR_MAX = 32;
 
 // ===================== Geração de IP Aleatório =====================
 
-// Gera um octeto aleatório (0-255)
+/**
+ * Gera um octeto aleatório válido para endereço IPv4
+ * @returns {number} Número entre 0 e 255
+ * @example
+ * const octeto = gerarOcteto(); // 192
+ */
 function gerarOcteto() {
     return Math.floor(Math.random() * 256);
 }
 
-// Gera um IP aleatório válido (evita alguns ranges especiais)
+/**
+ * Gera um endereço IP aleatório válido, evitando ranges especiais
+ * Evita: localhost (127.x), multicast (224.x-240.x), e endereços .0/.255
+ * @returns {string} Endereço IP no formato "xxx.xxx.xxx.xxx"
+ * @example
+ * const ip = gerarIpAleatorio(); // "192.168.1.100"
+ */
 function gerarIpAleatorio() {
     let ip;
     do {
-        const octeto1 = Math.floor(Math.random() * 223) + 1; // 1-223 (evita 0.x.x.x e ranges altos)
+        // Primeiro octeto: 1-223 (evita ranges especiais)
+        const octeto1 = Math.floor(Math.random() * 223) + 1;
         const octeto2 = gerarOcteto();
         const octeto3 = gerarOcteto();
-        const octeto4 = Math.floor(Math.random() * 254) + 1; // 1-254 (evita .0 e .255)
+        // Último octeto: 1-254 (evita .0 e .255)
+        const octeto4 = Math.floor(Math.random() * 254) + 1;
         ip = `${octeto1}.${octeto2}.${octeto3}.${octeto4}`;
-    } while (ip.startsWith('127.') || ip.startsWith('224.') || ip.startsWith('240.')); // Evita localhost e multicast
+    } while (ip.startsWith('127.') || ip.startsWith('224.') || ip.startsWith('240.'));
     
     return ip;
 }
 
-// Atualiza o IP de origem na interface e na variável
+/**
+ * Atualiza o IP de origem na interface e limpa resultados anteriores
+ * @param {string} novoIp - Novo endereço IP de origem
+ * @example
+ * atualizarIpOrigem("10.0.0.1");
+ */
 function atualizarIpOrigem(novoIp) {
     ipOrigem = novoIp;
     const lbl = document.getElementById("ipOrigem");
     if (lbl) lbl.textContent = `IP de Origem: ${ipOrigem}`;
     
-    // Limpa resultados pois mudou o IP de origem
+    // Limpa resultados pois mudou o contexto
     limparResultados();
 }
 
 // ===================== Utilitários de UI =====================
 
-// helptext abaixo do input
+/**
+ * Exibe mensagem de ajuda abaixo de um elemento input
+ * @param {string} id - ID do elemento de ajuda (formato: inputId + "-help")
+ * @param {string} [msg=""] - Mensagem a exibir (vazio para limpar)
+ * @param {string} [color="red"] - Cor do texto da mensagem
+ * @example
+ * setHelp("ip-help", "Formato inválido", "red");
+ * setHelp("mask-help", ""); // limpa a mensagem
+ */
 function setHelp(id, msg = "", color = "red") {
     const el = document.getElementById(id);
     if (!el) return;
@@ -45,20 +96,29 @@ function setHelp(id, msg = "", color = "red") {
     el.style.color = msg ? color : "";
 }
 
-// tooltip no próprio input
-function setTooltip(id, msg = "") {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.title = msg;
-}
-
-// marca visual do input inválido (opcional)
+/**
+ * Aplica estilo visual de erro a um elemento input
+ * @param {HTMLElement} inputEl - Elemento input a ser marcado
+ * @param {boolean} isInvalid - Se true, aplica estilo de erro; se false, remove
+ * @example
+ * const input = document.getElementById("ip");
+ * setInvalid(input, true); // marca como inválido
+ * setInvalid(input, false); // remove marcação
+ */
 function setInvalid(inputEl, isInvalid) {
     if (!inputEl) return;
     inputEl.classList.toggle("input-error", !!isInvalid);
     inputEl.setAttribute("aria-invalid", isInvalid ? "true" : "false");
 }
 
+/**
+ * Define texto e cor de um elemento de resultado
+ * @param {string} id - ID do elemento
+ * @param {string} texto - Texto a exibir
+ * @param {string} [color=""] - Cor do texto (vazio para padrão)
+ * @example
+ * setTexto("mask-decimal", "255.255.255.0", "#059669");
+ */
 function setTexto(id, texto, color = "") {
     const el = document.getElementById(id);
     if (!el) return;
@@ -66,61 +126,80 @@ function setTexto(id, texto, color = "") {
     el.style.color = color || "";
 }
 
+/**
+ * Limpa todos os resultados e estados de validação da interface
+ * Remove mensagens de erro, resultados anteriores e estilos visuais
+ * @example
+ * limparResultados(); // Limpa toda a interface
+ */
 function limparResultados() {
     setTexto("mask-decimal", "---");
     setTexto("same-network", "---");
-    // limpa helptexts
     setHelp("mask-help", "");
     setHelp("ip-help", "");
-    // limpa estados visuais
     setInvalid(document.getElementById("mask"), false);
     setInvalid(document.getElementById("ip"), false);
 }
 
+/**
+ * Exibe os resultados da verificação de rede na interface
+ * @param {Object} resultado - Objeto com os resultados da verificação
+ * @param {string} resultado.mascaraDecimal - Máscara em formato decimal
+ * @param {boolean} resultado.mesmaRede - Se os IPs estão na mesma rede
+ * @param {string} ipDestino - IP de destino para exibição
+ * @example
+ * const resultado = {mascaraDecimal: "255.255.255.0", mesmaRede: true};
+ * mostrarResultados(resultado, "192.168.1.100");
+ */
 function mostrarResultados({ mascaraDecimal, mesmaRede }, ipDestino) {
-    // limpa mensagens de erro de campos
     setHelp("mask-help", "");
     setHelp("ip-help", "");
     setInvalid(document.getElementById("mask"), false);
     setInvalid(document.getElementById("ip"), false);
 
-    setTexto("mask-decimal", mascaraDecimal, "#059669"); // verde para resultado válido
+    setTexto("mask-decimal", mascaraDecimal, "#059669"); 
     setTexto(
         "same-network",
         mesmaRede
         ? `O IP ${ipDestino} ESTÁ na mesma rede que ${ipOrigem}`
         : `O IP ${ipDestino} NÃO está na mesma rede que ${ipOrigem}`,
-        mesmaRede ? "#059669" : "#dc2626" // verde para sucesso, vermelho apenas para "não está"
+        mesmaRede ? "#059669" : "#dc2626"
     );
 }
 
 // ===================== Validações & Lógica =====================
 
-//Função para devolver o CIDR ou NaN se for inválido
+/**
+ * Valida e converte entrada CIDR para número inteiro
+ * Remove espaços e barras, valida formato e range
+ * @param {string|number} cidr - Valor CIDR a ser validado (pode incluir "/")
+ * @returns {{valor: number, erro: string|null}} Objeto com valor numérico e possível erro
+ * @example
+ * limparEConverterCidr("24")     // {valor: 24, erro: null}
+ * limparEConverterCidr("/16")    // {valor: 16, erro: null}
+ * limparEConverterCidr("abc")    // {valor: NaN, erro: "Máscara deve conter apenas números."}
+ * limparEConverterCidr("33")     // {valor: NaN, erro: "Máscara deve ser menor ou igual a 32."}
+ */
 function limparEConverterCidr(cidr) {
     if (cidr === null || cidr === undefined) return { valor: NaN, erro: "Informe a máscara CIDR." };
 
     const cidrLimpo = String(cidr).trim().replace(/^\s*\/?/, "");
     if (cidrLimpo === "") return { valor: NaN, erro: "Informe a máscara CIDR." };
-    
-    // Verifica se contém apenas dígitos (sem pontos, letras, símbolos)
+
     if (!/^\d+$/.test(cidrLimpo)) {
         return { valor: NaN, erro: "Máscara deve conter apenas números." };
     }
     
     const cidrNumero = Number(cidrLimpo);
     
-    // Verifica se é um número válido (redundante, mas por segurança)
     if (isNaN(cidrNumero)) {
         return { valor: NaN, erro: "Máscara deve ser um número." };
     }
     
-    // Verifica se é um número inteiro
     if (!Number.isInteger(cidrNumero)) {
         return { valor: NaN, erro: "Máscara deve ser um número inteiro." };
     }
     
-    // Verifica o range
     if (cidrNumero < CIDR_MIN) {
         return { valor: NaN, erro: `Máscara deve ser maior ou igual a ${CIDR_MIN}.` };
     }
@@ -132,51 +211,104 @@ function limparEConverterCidr(cidr) {
     return { valor: cidrNumero, erro: null };
 }
 
-//Função para converter CIDR (1-32) em máscara decimal ponto (Ex.: 255.255.255.0)
+/**
+ * Converte notação CIDR em máscara de sub-rede decimal
+ * Algoritmo: Cria string binária com CIDR 1s seguidos de 0s, depois converte para decimal
+ * @param {number} cidr - Número CIDR entre 1 e 32
+ * @returns {string} Máscara no formato "xxx.xxx.xxx.xxx"
+ * @throws {Error} Se CIDR estiver fora do range válido
+ * @example
+ * cidrParaDecimal(24)  // "255.255.255.0"
+ * cidrParaDecimal(16)  // "255.255.0.0"
+ * cidrParaDecimal(8)   // "255.0.0.0"
+ */
 function cidrParaDecimal(cidr) {
     if (!Number.isInteger(cidr) || cidr < CIDR_MIN || cidr > CIDR_MAX) {
         throw new Error(`CIDR inválido. Use um inteiro entre ${CIDR_MIN} e ${CIDR_MAX}.`);
-    } //Validação: só aceita inteiro entre 1 e 32. Se cidr for string, NaN, negativo ou > 32, lança erro.
-    const mascaraBin = "1".repeat(cidr).padEnd(32, "0"); //Cria uma string binária com cidr vezes o número 1, e completa até 32 bits com zeros (Ex: /24 → "11111111111111111111111100000000")
-    const octetos = mascaraBin.match(/.{1,8}/g); //Divide essa string em blocos de 8 bits (4 blocos = 4 octetos) (Ex: ["11111111","11111111","11111111","00000000"])
-    return octetos.map(octeto => parseInt(octeto, 2)).join("."); //Converte cada bloco binário para decimal e junta com ponto (Ex.:"255.255.255.0") 
+    }
+
+    const mascaraBin = "1".repeat(cidr).padEnd(32, "0");
+    const octetos = mascaraBin.match(/.{1,8}/g);
+    return octetos.map(octeto => parseInt(octeto, 2)).join(".");
 }
 
-//Função para converter IP (Ex.: "192.168.1.10") em número inteiro de 32 bits(0 a 4.294.967.295)
+/**
+ * Converte endereço IP string em número inteiro de 32 bits
+ * Algoritmo: Divide em octetos, valida cada um (0-255), e usa shift left + soma
+ * @param {string} ip - Endereço IP no formato "xxx.xxx.xxx.xxx"
+ * @returns {number} Representação numérica do IP (0 a 4.294.967.295)
+ * @throws {Error} Se IP for inválido, mal formatado ou octetos fora do range
+ * @example
+ * ipParaInteiro("192.168.1.1")     // 3232235777
+ * ipParaInteiro("10.0.0.1")        // 167772161
+ * ipParaInteiro("255.255.255.255") // 4294967295
+ */
 function ipParaInteiro(ip) {
-
     if (typeof ip !== "string") throw new Error("IP inválido: valor não é texto.");
     const ipTrim = ip.trim();
     if (!ipTrim) throw new Error("Informe o IP de destino.");
 
-    const octetos = ipTrim.split("."); //Divide o IP em 4 partes pelo ponto (Ex.: "192.168.1.10" → ["192","168","1","10"])
-    if (octetos.length !== 4) throw new Error(`IP inválido: ${ip}`); //Garante que existem exatos 4 octetos. Se não, lança erro
+    const octetos = ipTrim.split(".");
+    if (octetos.length !== 4) throw new Error(`IP inválido: ${ip}`);
 
-    let acumulador = 0; //Acumulador que vai construir o inteiro de 32 bits
+    let acumulador = 0;
     for (const octeto of octetos) {
-        if (!/^\d+$/.test(octeto)) throw new Error(`Octeto inválido`); //Valida que o octeto tem apenas dígitos (sem sinais, espaços, letras)
-        const valorOcteto = parseInt(octeto, 10); //Converte para número em base 10
-        if (valorOcteto < 0 || valorOcteto > 255) throw new Error(`Octeto fora do intervalo (0–255): ${octeto}`); //Checa o intervalo válido de um octeto IPv4 (0-255)
-        acumulador = (acumulador << 8) + valorOcteto; //Desloca o acumulador 8 bits à esquerda (abre espaço para o próximo octeto) e soma o valor do octeto atual.
+        if (!/^\d+$/.test(octeto)) throw new Error(`Octeto inválido`);
+        const valorOcteto = parseInt(octeto, 10);
+        if (valorOcteto < 0 || valorOcteto > 255) throw new Error(`Octeto fora do intervalo (0–255): ${octeto}`);
+        acumulador = (acumulador << 8) + valorOcteto;
     }
-    return acumulador >>> 0; //Retorna o acumulador convertido para inteiro de 32 bits sem sinal, garantindo que nunca fique negativo (Ex: "192.168.1.10" → 3232235786)
+    return acumulador >>> 0;
 }
 
-//Função principal
+/**
+ * 🎯 FUNÇÃO PRINCIPAL: Verifica se dois IPs estão na mesma rede
+ * 
+ * Algoritmo de Verificação de Rede:
+ * 1. Valida e converte CIDR de entrada
+ * 2. Converte CIDR para máscara decimal (ex: 24 → 255.255.255.0)
+ * 3. Converte IPs (origem e destino) para representação inteira de 32 bits
+ * 4. Converte máscara decimal para inteiro
+ * 5. Aplica operação AND bit a bit nos IPs com a máscara
+ * 6. Compara os endereços de rede resultantes
+ * 
+ * @param {string} ipDestino - IP de destino no formato "xxx.xxx.xxx.xxx"
+ * @param {string|number} cidrEntrada - Notação CIDR (1-32), aceita string ou número
+ * @returns {{ipOrigem: string, mascaraDecimal: string, mesmaRede: boolean}} Resultado completo da verificação
+ * @throws {Error} Se CIDR ou IP de destino forem inválidos
+ * 
+ * @example
+ * // IPs na mesma rede /24
+ * verificarRede("192.168.1.100", 24)
+ * // Retorna: {
+ * //   ipOrigem: "192.168.1.50",
+ * //   mascaraDecimal: "255.255.255.0",
+ * //   mesmaRede: true
+ * // }
+ * 
+ * @example
+ * // IPs em redes diferentes
+ * verificarRede("10.0.0.1", "24")
+ * // Retorna: {
+ * //   ipOrigem: "192.168.1.50",
+ * //   mascaraDecimal: "255.255.255.0",
+ * //   mesmaRede: false
+ * // }
+ */
 function verificarRede(ipDestino, cidrEntrada) {
-    const resultadoCidr = typeof cidrEntrada === "number" ? { valor: cidrEntrada, erro: null } : limparEConverterCidr(cidrEntrada); //Se já for número, usa direto. Se for string, chama limparEConverterCidr para transformar em número inteiro
+    const resultadoCidr = typeof cidrEntrada === "number" ? { valor: cidrEntrada, erro: null } : limparEConverterCidr(cidrEntrada);
     
     if (Number.isNaN(resultadoCidr.valor)) {
         throw new Error(resultadoCidr.erro || "CIDR inválido.");
     }
     
     const cidrNumero = resultadoCidr.valor;
-    const mascaraDecimal = cidrParaDecimal(cidrNumero); //Converte o CIDR em decimal (Ex: 24 → 255.255.255.0)
-    const ipDestinoInt = ipParaInteiro(ipDestino); //Valida e converte o IP de destino para um inteiro de 32 bit
-    const ipOrigemInt = ipParaInteiro(ipOrigem); //Valida e converte o IP de origem para um inteiro de 32 bit
-    const mascaraInt = ipParaInteiro(mascaraDecimal); //Valida e converte a máscara em Decimal para um inteiro de 32 bit
+    const mascaraDecimal = cidrParaDecimal(cidrNumero);
+    const ipDestinoInt = ipParaInteiro(ipDestino);
+    const ipOrigemInt = ipParaInteiro(ipOrigem);
+    const mascaraInt = ipParaInteiro(mascaraDecimal);
 
-    const redeDestino = ipDestinoInt & mascaraInt; //& é o operador AND bit a bit (Ex: 192.168.1.10 & 255.255.255.0 → 192.168.1.0)
+    const redeDestino = ipDestinoInt & mascaraInt;
     const redeOrigem = ipOrigemInt & mascaraInt;
 
     return {
@@ -188,6 +320,21 @@ function verificarRede(ipDestino, cidrEntrada) {
  
 // ===================== Integração com o HTML =====================
 
+/**
+ * 🎯 CONTROLADOR PRINCIPAL: Executa validação e cálculo quando usuário clica "Verificar"
+ * 
+ * Fluxo de Execução:
+ * 1. Obtém valores dos campos de entrada (IP e CIDR)
+ * 2. Limpa validações anteriores
+ * 3. Valida CIDR em tempo real
+ * 4. Valida formato do IP de destino
+ * 5. Se válidos, executa verificação de rede
+ * 6. Exibe resultados ou erros na interface
+ * 
+ * @example
+ * // Chamada automática pelo evento de clique do botão "Verificar"
+ * calcular();
+ */
 function calcular() {
     const ipInput = document.getElementById("ip");
     const maskInput = document.getElementById("mask");
@@ -195,19 +342,17 @@ function calcular() {
     const ipDestino = ipInput?.value ?? "";
     const cidrRaw = maskInput?.value ?? "";
 
-    // limpa mensagens anteriores para recalcular
     setHelp("mask-help", "");
     setHelp("ip-help", "");
     setInvalid(maskInput, false);
     setInvalid(ipInput, false);
 
-    // validação do CIDR (helptext + visual)
     const resultadoCidr = limparEConverterCidr(cidrRaw);
     if (Number.isNaN(resultadoCidr.valor)) {
         const msg = resultadoCidr.erro || "CIDR inválido.";
         setHelp("mask-help", msg);
         setInvalid(maskInput, true);
-        // não prossegue até o usuário corrigir
+
         return;
     }
     
@@ -223,7 +368,6 @@ function calcular() {
         return;
     }
 
-    // se chegou aqui, entradas válidas → calcula e mostra resultados
     try {
         const resultado = verificarRede(ipDestino, cidr);
         mostrarResultados(resultado, ipDestino.trim());
@@ -234,6 +378,19 @@ function calcular() {
     }
 }
 
+// ===================== INICIALIZAÇÃO DA APLICAÇÃO =====================
+
+/**
+ * 🚀 INICIALIZADOR: Configura todos os event listeners quando o DOM está pronto
+ * 
+ * Configurações realizadas:
+ * - Exibe IP de origem inicial
+ * - Configura clique do botão "Verificar"
+ * - Configura geração de IP aleatório com feedback visual
+ * - Configura validação em tempo real dos campos
+ * - Configura tecla Enter para executar verificação
+ * - Limpa interface inicial
+ */
 document.addEventListener("DOMContentLoaded", () => {
     const lbl = document.getElementById("ipOrigem");
     if (lbl) lbl.textContent = `IP de Origem: ${ipOrigem}`;
@@ -248,7 +405,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const novoIp = gerarIpAleatorio();
             atualizarIpOrigem(novoIp);
             
-            // Efeito visual de “carregando”
             generateBtn.textContent = "🔄 Gerando...";
             generateBtn.disabled = true;
             
@@ -262,7 +418,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const ipInput = document.getElementById("ip");
     const maskInput = document.getElementById("mask");
     
-    // Validação em tempo real para o campo CIDR
     if (maskInput) {
         maskInput.addEventListener("input", () => {
             const cidrRaw = maskInput.value;
